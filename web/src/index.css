@@ -102,6 +102,14 @@ body {
   box-shadow: var(--shadow-md);
 }
 
+.theme-toggle.fixed {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 200;
+  margin-left: 0;
+}
+
 header {
   display: flex;
   justify-content: space-between;

@@ -58,6 +58,15 @@ function App() {
 
   return (
     <div className="app-container">
+      {!token && (
+        <button
+          className="theme-toggle fixed"
+          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+        >
+          <span>{theme === 'dark' ? '☀️' : '🌙'}</span>
+        </button>
+      )}
 
       {!token ? (
         <Login onLoginSuccess={handleLoginSuccess} apiUrl={API_URL} />
