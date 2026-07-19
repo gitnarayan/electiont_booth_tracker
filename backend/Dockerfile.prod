@@ -1,0 +1,26 @@
+# Production multi-stage Dockerfile for backend
+FROM node:18-alpine AS builder
+WORKDIR /usr/src/app
+
+# Install only production dependencies
+COPY package*.json ./
+RUN npm ci --production --silent
+
+# Copy source
+COPY . .
+
+# Final runtime image
+FROM node:18-alpine
+WORKDIR /usr/src/app
+ENV NODE_ENV=production
+
+# Copy app and node_modules from builder
+COPY --from=builder /usr/src/app /usr/src/app
+
+EXPOSE 5000
+
+# Use a non-root node user if needed (optional)
+# RUN addgroup -S app && adduser -S app -G app
+# USER app
+
+CMD ["node", "server.js"]

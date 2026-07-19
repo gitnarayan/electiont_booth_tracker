@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  backend:
+    environment:
+      - MONGODB_URI=${MONGODB_URI:-mongodb://mongo:27017/election}
+      - PORT=${BACKEND_PORT:-5000}
+      - NODE_ENV=production
+
+  web:
+    environment:
+      - VITE_API_URL=${VITE_API_URL:-http://localhost:5000}
+      - NODE_ENV=production
+
+# Usage: docker compose -f docker-compose.prod.yml -f docker-compose.prod.override.yml up -d
+# You can provide values via an env file or exported env vars, for example:
+# MONGODB_URI=mongodb://user:pass@mongo:27017/election VITE_API_URL=https://api.example.com docker compose -f docker-compose.prod.yml -f docker-compose.prod.override.yml up -d

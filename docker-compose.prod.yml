@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:6.0
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - prodnet
+
+  backend:
+    image: election-backend:prod
+    restart: unless-stopped
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/election
+      - PORT=5000
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+    networks:
+      - prodnet
+
+  web:
+    image: election-web:prod
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - prodnet
+
+volumes:
+  mongo-data:
+
+networks:
+  prodnet:
+    driver: bridge

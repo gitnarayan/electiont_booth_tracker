@@ -8,125 +8,236 @@ import Vote from './models/Vote.js';
 
 dotenv.config();
 
-const constituencies = [
-  { name: 'East District', state: 'State A' },
-  { name: 'West Valley', state: 'State A' },
-  { name: 'North Hills', state: 'State B' },
-  { name: 'South Coast', state: 'State B' },
-  { name: 'Central Metro', state: 'State C' }
-];
-
-const candidates = [
-  { name: 'Rajesh Kumar', party: 'Progressive Party (PRG)' },
-  { name: 'Priya Sharma', party: 'Conservative Party (CON)' },
-  { name: 'Amit Patel', party: 'Liberal Alliance (LIB)' },
-  { name: 'Sunita Devi', party: 'Independent (IND)' }
-];
-
-const constituencyWeights = {
-  'East District': [0.45, 0.25, 0.15, 0.15],
-  'West Valley': [0.20, 0.50, 0.15, 0.15],
-  'North Hills': [0.15, 0.15, 0.50, 0.20],
-  'South Coast': [0.20, 0.15, 0.20, 0.45],
-  'Central Metro': [0.28, 0.27, 0.25, 0.20]
+// Party metadata
+const PARTIES = {
+  BJP: { code: 'BJP', color: '#FF9933' },
+  INC: { code: 'INC', color: '#19A0FF' },
+  BSP: { code: 'BSP', color: '#22409A' },
+  ASP: { code: 'ASP', color: '#0066CC' },
+  IND: { code: 'IND', color: '#808080' }
 };
 
-const boothTypes = [
-  'Government High School',
-  'Panchayat Community Center',
-  'Public Library',
-  'Municipal Office',
-  'Civil Dispensary'
+// Exact constituency and candidate data per specification
+const constituencySeeds = [
+  {
+    name: 'Datia',
+    district: 'Datia',
+    state: 'Madhya Pradesh',
+    // base percentages: BJP 41, INC 35, ASP 14, BSP 10
+    candidates: [
+      { name: 'Ashutosh Tiwari', party: 'Bharatiya Janata Party (BJP)', partyCode: PARTIES.BJP.code, partyColor: PARTIES.BJP.color, weight: 0.41 },
+      { name: 'Ghanshyam Singh', party: 'Indian National Congress (INC)', partyCode: PARTIES.INC.code, partyColor: PARTIES.INC.color, weight: 0.35 },
+      { name: 'Damodar Singh Yadav', party: 'Azad Samaj Party (Kanshi Ram)', partyCode: PARTIES.ASP.code, partyColor: PARTIES.ASP.color, weight: 0.14 },
+      { name: 'BSP Candidate', party: 'Bahujan Samaj Party (BSP)', partyCode: PARTIES.BSP.code, partyColor: PARTIES.BSP.color, weight: 0.10 }
+    ]
+  },
+  {
+    name: 'Bhander (SC)',
+    district: 'Datia',
+    state: 'Madhya Pradesh',
+    // INC 39, BJP 36, BSP 16, IND 9
+    candidates: [
+      { name: 'Ghanshyam Pironiya', party: 'Bharatiya Janata Party (BJP)', partyCode: PARTIES.BJP.code, partyColor: PARTIES.BJP.color, weight: 0.36 },
+      { name: 'Phool Singh Baraiya', party: 'Indian National Congress (INC)', partyCode: PARTIES.INC.code, partyColor: PARTIES.INC.color, weight: 0.39 },
+      { name: 'BSP Candidate', party: 'Bahujan Samaj Party (BSP)', partyCode: PARTIES.BSP.code, partyColor: PARTIES.BSP.color, weight: 0.16 },
+      { name: 'Independent Candidate', party: 'Independent', partyCode: PARTIES.IND.code, partyColor: PARTIES.IND.color, weight: 0.09 }
+    ]
+  },
+  {
+    name: 'Dabra (SC)',
+    district: 'Gwalior',
+    state: 'Madhya Pradesh',
+    // BJP 40, INC 34, BSP 18, IND 8
+    candidates: [
+      { name: 'Suresh Raje', party: 'Bharatiya Janata Party (BJP)', partyCode: PARTIES.BJP.code, partyColor: PARTIES.BJP.color, weight: 0.40 },
+      { name: 'Imarti Devi', party: 'Indian National Congress (INC)', partyCode: PARTIES.INC.code, partyColor: PARTIES.INC.color, weight: 0.34 },
+      { name: 'BSP Candidate', party: 'Bahujan Samaj Party (BSP)', partyCode: PARTIES.BSP.code, partyColor: PARTIES.BSP.color, weight: 0.18 },
+      { name: 'Independent Candidate', party: 'Independent', partyCode: PARTIES.IND.code, partyColor: PARTIES.IND.color, weight: 0.08 }
+    ]
+  },
+  {
+    name: 'Bhitarwar',
+    district: 'Gwalior',
+    state: 'Madhya Pradesh',
+    // BJP 42, INC 33, BSP 15, IND 10
+    candidates: [
+      { name: 'Mohan Singh Rathore', party: 'Bharatiya Janata Party (BJP)', partyCode: PARTIES.BJP.code, partyColor: PARTIES.BJP.color, weight: 0.42 },
+      { name: 'Lakhan Singh Yadav', party: 'Indian National Congress (INC)', partyCode: PARTIES.INC.code, partyColor: PARTIES.INC.color, weight: 0.33 },
+      { name: 'BSP Candidate', party: 'Bahujan Samaj Party (BSP)', partyCode: PARTIES.BSP.code, partyColor: PARTIES.BSP.color, weight: 0.15 },
+      { name: 'Independent Candidate', party: 'Independent', partyCode: PARTIES.IND.code, partyColor: PARTIES.IND.color, weight: 0.10 }
+    ]
+  },
+  {
+    name: 'Karera (SC)',
+    district: 'Shivpuri',
+    state: 'Madhya Pradesh',
+    // INC 38, BJP 37, BSP 17, IND 8
+    candidates: [
+      { name: 'Ramesh Prasad Khatik', party: 'Bharatiya Janata Party (BJP)', partyCode: PARTIES.BJP.code, partyColor: PARTIES.BJP.color, weight: 0.37 },
+      { name: 'Pragilal Jatav', party: 'Indian National Congress (INC)', partyCode: PARTIES.INC.code, partyColor: PARTIES.INC.color, weight: 0.38 },
+      { name: 'BSP Candidate', party: 'Bahujan Samaj Party (BSP)', partyCode: PARTIES.BSP.code, partyColor: PARTIES.BSP.color, weight: 0.17 },
+      { name: 'Independent Candidate', party: 'Independent', partyCode: PARTIES.IND.code, partyColor: PARTIES.IND.color, weight: 0.08 }
+    ]
+  }
 ];
 
-const areas = [
-  'Sector 1',
-  'Market Road',
-  'Green Enclave',
-  'Subhash Nagar',
-  'Railway Colony',
-  'Nehru Chowk',
-  'High Street'
+const boothNameTypes = [
+  'Government Higher Secondary School',
+  'Government Primary School',
+  'Government Girls School',
+  'Panchayat Bhawan',
+  'Civil Hospital',
+  'Community Health Centre',
+  'ITI College',
+  'Government College',
+  'Anganwadi Kendra',
+  'Primary Health Centre'
 ];
+
+const locations = [
+  'Civil Lines',
+  'Station Road',
+  'Jawahar Ganj',
+  'Old Bus Stand',
+  'Collectorate Road',
+  'Shiv Colony',
+  'Nehru Nagar',
+  'Kamal Vihar',
+  'New Town',
+  'Market Area'
+];
+
+function jitterWeights(baseWeights) {
+  // Apply ±5% absolute jitter (0.05) to each weight, clamp to [0.01, 0.99], then normalize
+  const jittered = baseWeights.map((w) => {
+    const delta = (Math.random() - 0.5) * 0.10; // ±0.05
+    return Math.max(0.01, w + delta);
+  });
+  const total = jittered.reduce((s, v) => s + v, 0);
+  return jittered.map((v) => v / total);
+}
 
 function distributeVotes(turnoutVotes, weights) {
-  const noisyWeights = weights.map((weight) => Math.max(0.05, weight + (Math.random() - 0.5) * 0.1));
-  const weightTotal = noisyWeights.reduce((total, weight) => total + weight, 0);
-  const normalizedWeights = noisyWeights.map((weight) => weight / weightTotal);
+  const normalized = jitterWeights(weights);
   const votes = [];
-  let assignedVotes = 0;
-
-  for (let index = 0; index < normalizedWeights.length - 1; index += 1) {
-    const candidateVotes = Math.round(turnoutVotes * normalizedWeights[index]);
-    votes.push(candidateVotes);
-    assignedVotes += candidateVotes;
+  let assigned = 0;
+  for (let i = 0; i < normalized.length - 1; i += 1) {
+    const v = Math.max(0, Math.round(turnoutVotes * normalized[i]));
+    votes.push(v);
+    assigned += v;
   }
-
-  votes.push(turnoutVotes - assignedVotes);
+  votes.push(Math.max(0, turnoutVotes - assigned));
   return votes;
 }
 
 async function seed() {
   await connectDatabase();
-  console.log('Seeding MongoDB started...');
+  console.log('Seeding MP constituencies...');
 
+  // Defensive: remove an existing legacy unique index on `name` if present
+  try {
+    const indexes = await Candidate.collection.indexes();
+    const nameIndex = indexes.find(idx => idx.name === 'name_1');
+    if (nameIndex) {
+      console.log('Dropping legacy index name_1 on candidates collection');
+      await Candidate.collection.dropIndex('name_1');
+    }
+  } catch (err) {
+    // Non-fatal. Continue seeding.
+    console.warn('Could not drop legacy index (continuing):', err.message);
+  }
+
+  // Clear existing data
   await Promise.all([
     Vote.deleteMany({}),
     Booth.deleteMany({}),
-    Constituency.deleteMany({}),
-    Candidate.deleteMany({})
+    Candidate.deleteMany({}),
+    Constituency.deleteMany({})
   ]);
-  console.log('Cleared existing MongoDB data.');
+  console.log('Cleared Vote, Booth, Candidate, Constituency collections');
 
-  const seededConstituencies = await Constituency.insertMany(constituencies);
-  const seededCandidates = await Candidate.insertMany(candidates);
-  const constituenciesByName = new Map(seededConstituencies.map((constituency) => [constituency.name, constituency]));
+  // Insert constituencies
+  const constituencies = await Constituency.insertMany(
+    constituencySeeds.map(({ candidates, ...c }) => c)
+  );
+  const byName = new Map(constituencies.map((c) => [c.name, c]));
 
-  const boothSeeds = [];
-  const voteDistributions = [];
-
-  for (const constituency of seededConstituencies) {
-    const boothCount = 30 + Math.floor(Math.random() * 11);
-    const weights = constituencyWeights[constituency.name] || [0.25, 0.25, 0.25, 0.25];
-
-    for (let boothNumber = 1; boothNumber <= boothCount; boothNumber += 1) {
-      const totalVoters = 800 + Math.floor(Math.random() * 701);
-      const turnoutVotes = Math.floor(totalVoters * (0.55 + Math.random() * 0.30));
-      const type = boothTypes[Math.floor(Math.random() * boothTypes.length)];
-      const area = areas[Math.floor(Math.random() * areas.length)];
-
-      boothSeeds.push({
-        constituency: constituenciesByName.get(constituency.name)._id,
-        boothNumber,
-        name: `${type} - Room ${boothNumber}`,
-        location: `${area}, ${constituency.name}`,
-        totalVoters,
-        turnoutVotes
+  // Insert candidates tied to each constituency
+  const candidateDocs = [];
+  for (const seed of constituencySeeds) {
+    const cons = byName.get(seed.name);
+    for (const cand of seed.candidates) {
+      candidateDocs.push({
+        constituency: cons._id,
+        name: cand.name,
+        party: cand.party,
+        partyCode: cand.partyCode,
+        partyColor: cand.partyColor
       });
-      voteDistributions.push(distributeVotes(turnoutVotes, weights));
     }
   }
 
-  const seededBooths = await Booth.insertMany(boothSeeds);
-  const voteSeeds = seededBooths.flatMap((booth, boothIndex) => (
-    seededCandidates.map((candidate, candidateIndex) => ({
-      booth: booth._id,
-      candidate: candidate._id,
-      votesReceived: voteDistributions[boothIndex][candidateIndex]
-    }))
-  ));
+  const candidates = await Candidate.insertMany(candidateDocs);
+  const candidatesByConst = new Map();
+  for (const c of candidates) {
+    const id = c.constituency.toString();
+    const arr = candidatesByConst.get(id) || [];
+    arr.push(c);
+    candidatesByConst.set(id, arr);
+  }
+
+  // Create booths and vote distributions
+  const boothSeeds = [];
+  const voteDistributions = [];
+  for (const cons of constituencies) {
+    const seed = constituencySeeds.find((s) => s.name === cons.name);
+    const baseWeights = seed.candidates.map((c) => c.weight);
+
+    for (let i = 1; i <= 50; i += 1) {
+      const totalVoters = 900 + Math.floor(Math.random() * 601); // 900-1500
+      const turnoutFraction = 0.60 + Math.random() * 0.25; // 60%-85%
+      const turnoutVotes = Math.floor(totalVoters * turnoutFraction);
+      const type = boothNameTypes[Math.floor(Math.random() * boothNameTypes.length)];
+      const loc = locations[Math.floor(Math.random() * locations.length)];
+
+      boothSeeds.push({
+        constituency: cons._id,
+        boothNumber: i,
+        name: `${type} - Booth ${i}`,
+        location: `${loc}, ${cons.name}`,
+        totalVoters,
+        turnoutVotes
+      });
+
+      voteDistributions.push(distributeVotes(turnoutVotes, baseWeights));
+    }
+  }
+
+  const booths = await Booth.insertMany(boothSeeds);
+
+  // Build Vote docs: one per booth x candidate
+  const voteSeeds = [];
+  for (let i = 0; i < booths.length; i += 1) {
+    const booth = booths[i];
+    const dist = voteDistributions[i];
+    const consCands = candidatesByConst.get(booth.constituency.toString()) || [];
+    for (let j = 0; j < consCands.length; j += 1) {
+      voteSeeds.push({
+        booth: booth._id,
+        candidate: consCands[j]._id,
+        votesReceived: dist[j] || 0
+      });
+    }
+  }
+
   await Vote.insertMany(voteSeeds);
 
-  console.log(
-    `Seeding completed. Seeded ${seededConstituencies.length} constituencies, ${seededCandidates.length} candidates, ${seededBooths.length} booths, and ${voteSeeds.length} vote records.`
-  );
+  console.log(`Seeding completed: ${constituencies.length} constituencies, ${candidates.length} candidates, ${booths.length} booths, ${voteSeeds.length} votes.`);
+
+  await mongoose.disconnect();
 }
 
-seed()
-  .catch((error) => {
-    console.error('MongoDB seeding failed:', error.message);
-    process.exitCode = 1;
-  })
-  .finally(async () => {
-    await mongoose.disconnect();
-  });
+seed().catch((err) => {
+  console.error('Seeding failed:', err);
+  process.exitCode = 1;
+});

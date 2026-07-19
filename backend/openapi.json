@@ -1,0 +1,226 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Election Booth Tracker API",
+    "version": "1.0.0",
+    "description": "OpenAPI specification for the Election Booth Tracker backend API."
+  },
+  "servers": [
+    { "url": "http://localhost:5000", "description": "Local development server" }
+  ],
+  "paths": {
+    "/api/health": {
+      "get": {
+        "summary": "Health check",
+        "responses": {
+          "200": {
+            "description": "Service and database status",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HealthResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/constituencies": {
+      "get": {
+        "summary": "List constituencies with aggregate stats",
+        "responses": {
+          "200": {
+            "description": "Array of constituency summaries",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/ConstituencySummary" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/constituencies/{id}/booths": {
+      "get": {
+        "summary": "Get booths and votes for a constituency",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Constituency ID (MongoDB ObjectId string)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Constituency booths and vote breakdown",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "constituency_name": { "type": "string" },
+                    "booths": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Booth" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Invalid constituency ID" },
+          "404": { "description": "Constituency not found" }
+        }
+      }
+    },
+    "/api/booths/search": {
+      "get": {
+        "summary": "Search booths by name or booth number",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Search term: booth name or booth number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of matching booths",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Booth" }
+                }
+              }
+            }
+          },
+          "400": { "description": "Missing query parameter 'q'" }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "Analytics team login (mock)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AuthRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful login",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AuthResponse" }
+              }
+            }
+          },
+          "400": { "description": "Missing credentials" },
+          "401": { "description": "Invalid credentials" }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string" },
+          "database": { "type": "string" },
+          "booths": { "type": "integer" }
+        }
+      },
+      "ConstituencySummary": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "state": { "type": "string" },
+          "total_booths": { "type": "integer" },
+          "total_voters": { "type": "integer", "nullable": true },
+          "turnout_votes": { "type": "integer", "nullable": true },
+          "turnout_percentage": { "type": "number" },
+          "leading_candidate": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "name": { "type": "string" },
+              "party": { "type": "string" },
+              "votes": { "type": "integer" }
+            }
+          }
+        }
+      },
+      "Booth": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "booth_number": { "type": "integer" },
+          "name": { "type": "string" },
+          "location": { "type": "string" },
+          "total_voters": { "type": "integer" },
+          "turnout_votes": { "type": "integer" },
+          "turnout_percentage": { "type": "number" },
+          "votes": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Vote" }
+          },
+          "leading_candidate": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "name": { "type": "string" },
+              "party": { "type": "string" },
+              "votes": { "type": "integer" }
+            }
+          }
+        }
+      },
+      "Vote": {
+        "type": "object",
+        "properties": {
+          "candidate_id": { "type": "string" },
+          "name": { "type": "string" },
+          "party": { "type": "string" },
+          "party_code": { "type": "string" },
+          "party_color": { "type": "string" },
+          "votes": { "type": "integer" }
+        }
+      },
+      "AuthRequest": {
+        "type": "object",
+        "required": ["username", "password"],
+        "properties": {
+          "username": { "type": "string" },
+          "password": { "type": "string" }
+        }
+      },
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "token": { "type": "string" },
+          "user": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "username": { "type": "string" },
+              "role": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

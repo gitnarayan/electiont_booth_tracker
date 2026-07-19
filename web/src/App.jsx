@@ -10,6 +10,16 @@ function App() {
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
   const [isInitializing, setIsInitializing] = useState(true);
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === 'undefined') return 'dark';
+
+    const storedTheme = localStorage.getItem('theme');
+    if (storedTheme === 'light' || storedTheme === 'dark') {
+      return storedTheme;
+    }
+
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  });
 
   // Check localStorage for existing session
   useEffect(() => {
@@ -22,6 +32,11 @@ function App() {
     }
     setIsInitializing(false);
   }, []);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
 
   const handleLoginSuccess = (newToken, loggedInUser) => {
     setToken(newToken);
@@ -43,6 +58,7 @@ function App() {
 
   return (
     <div className="app-container">
+
       {!token ? (
         <Login onLoginSuccess={handleLoginSuccess} apiUrl={API_URL} />
       ) : (
@@ -60,6 +76,13 @@ function App() {
             <div className="user-profile">
               <span className="user-name">Welcome, <strong>{user?.name}</strong></span>
               <button className="btn-logout" onClick={handleLogout}>Logout</button>
+              <button
+                className="theme-toggle"
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              >
+                <span>{theme === 'dark' ? '☀️' : '🌙'}</span>
+              </button>
             </div>
           </header>
 

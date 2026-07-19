@@ -59,7 +59,10 @@ export default function Dashboard({ apiUrl }) {
   }, [selectedConstId, apiUrl]);
 
   // Selected constituency aggregate stats
-  const selectedConstData = constituencies.find(c => c.id === Number(selectedConstId));
+  // API constituency IDs are MongoDB strings, as is the value emitted by the select.
+  // Keeping this comparison string-to-string preserves the aggregate data for the
+  // currently selected constituency.
+  const selectedConstData = constituencies.find(c => c.id === selectedConstId);
 
   // Filter booths by search query
   const filteredBooths = booths.filter(b => 
@@ -100,18 +103,25 @@ export default function Dashboard({ apiUrl }) {
   // Calculate party colors
   const getPartyClass = (party) => {
     if (!party) return '';
-    if (party.includes('PRG')) return 'party-prg';
-    if (party.includes('CON')) return 'party-con';
-    if (party.includes('LIB')) return 'party-lib';
+    if (party.includes('BJP') || party.includes('Bharatiya')) return 'party-bjp';
+    if (party.includes('INC') || party.includes('Congress')) return 'party-inc';
+    if (party.includes('BSP') || party.includes('Bahujan')) return 'party-bsp';
+    if (party.includes('ASP') || party.includes('Azad')) return 'party-asp';
     return 'party-ind';
   };
 
   const getPartyColor = (party) => {
     if (!party) return '#94a3b8';
-    if (party.includes('PRG')) return '#3b82f6'; // blue
-    if (party.includes('CON')) return '#10b981'; // green
-    if (party.includes('LIB')) return '#8b5cf6'; // purple
-    return '#f97316'; // orange/independent
+    if (party.includes('BJP') || party.includes('Bharatiya')) return '#FF9933';
+    if (party.includes('INC') || party.includes('Congress')) return '#19A0FF';
+    if (party.includes('BSP') || party.includes('Bahujan')) return '#22409A';
+    if (party.includes('ASP') || party.includes('Azad')) return '#0066CC';
+    return '#808080';
+  };
+
+  const getPartyTextColor = (party) => {
+    // light text for all party badge colors for contrast
+    return '#FFFFFF';
   };
 
   // Prepare data for candidate bar chart (Aggregated votes across all booths in selected constituency)
@@ -207,7 +217,7 @@ export default function Dashboard({ apiUrl }) {
           </div>
           <div className="metric-card cyan">
             <span className="metric-title">Registered Voters</span>
-            <span className="metric-value">{selectedConstData.total_voters.toLocaleString()}</span>
+            <span className="metric-value">{selectedConstData.total_voters != null ? selectedConstData.total_voters.toLocaleString() : 'N/A'}</span>
             <span className="metric-desc">Eligible electorate size</span>
           </div>
           <div className="metric-card green">
@@ -216,7 +226,7 @@ export default function Dashboard({ apiUrl }) {
               {turnoutPercentage}%
             </span>
             <span className="metric-desc">
-              {selectedConstData.turnout_votes.toLocaleString()} votes cast
+              {(selectedConstData.turnout_votes != null ? selectedConstData.turnout_votes.toLocaleString() : '0')} votes cast
             </span>
           </div>
           <div className="metric-card purple">
@@ -227,11 +237,17 @@ export default function Dashboard({ apiUrl }) {
             <span className="metric-desc">
               {selectedConstData.leading_candidate ? (
                 <>
-                  <span className={`metric-badge ${getPartyClass(selectedConstData.leading_candidate.party)}`}>
+                  <span
+                    className="metric-badge"
+                    style={{
+                      backgroundColor: getPartyColor(selectedConstData.leading_candidate.party),
+                      color: getPartyTextColor(selectedConstData.leading_candidate.party)
+                    }}
+                  >
                     {selectedConstData.leading_candidate.party.split(' ')[0]}
                   </span>
                   <span style={{ marginLeft: '0.5rem' }}>
-                    ({selectedConstData.leading_candidate.votes.toLocaleString()} votes)
+                    ({(selectedConstData.leading_candidate.votes != null ? selectedConstData.leading_candidate.votes.toLocaleString() : '0')} votes)
                   </span>
                 </>
               ) : 'No votes recorded'}
@@ -287,10 +303,10 @@ export default function Dashboard({ apiUrl }) {
                         <div style={{ fontWeight: '500', color: 'var(--text-primary)' }}>{b.name}</div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{b.location}</div>
                       </td>
-                      <td>{b.total_voters.toLocaleString()}</td>
+                      <td>{b.total_voters != null ? b.total_voters.toLocaleString() : 'N/A'}</td>
                       <td>
                         <div className="text-highlight-green">{b.turnout_percentage}%</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{b.turnout_votes.toLocaleString()} polled</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{b.turnout_votes != null ? b.turnout_votes.toLocaleString() : '0'} polled</div>
                         <div className="turnout-bar-container">
                           <div 
                             className="turnout-bar" 
@@ -306,11 +322,19 @@ export default function Dashboard({ apiUrl }) {
                           <div>
                             <div style={{ fontWeight: '500', color: 'var(--text-primary)' }}>{b.leading_candidate.name}</div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.15rem' }}>
-                              <span className={`brand-badge ${getPartyClass(b.leading_candidate.party)}`} style={{ fontSize: '0.65rem', padding: '0.05rem 0.25rem' }}>
+                              <span
+                                className={`brand-badge`}
+                                style={{
+                                  fontSize: '0.65rem',
+                                  padding: '0.05rem 0.25rem',
+                                  backgroundColor: getPartyColor(b.leading_candidate.party),
+                                  color: getPartyTextColor(b.leading_candidate.party)
+                                }}
+                              >
                                 {b.leading_candidate.party.split('(')[1]?.replace(')', '') || b.leading_candidate.party}
                               </span>
                               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                                {b.leading_candidate.votes.toLocaleString()} votes
+                                {(b.leading_candidate && b.leading_candidate.votes != null) ? b.leading_candidate.votes.toLocaleString() : '0'} votes
                               </span>
                             </div>
                           </div>

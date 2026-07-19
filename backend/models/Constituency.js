@@ -1,11 +1,29 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const constituencySchema = new mongoose.Schema(
   {
-    name: { type: String, required: true, unique: true, trim: true },
-    state: { type: String, required: true, trim: true }
+    name: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
+
+    district: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    state: {
+      type: String,
+      required: true,
+      trim: true,
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
-export default mongoose.model('Constituency', constituencySchema);
+export default mongoose.model("Constituency", constituencySchema);
