@@ -6,6 +6,19 @@ A small full-stack project providing an internal analytics dashboard and a field
 
 ---
 
+
+
+# Live Demo
+
+### Web Application
+https://electiont-booth-tracker.vercel.app
+
+### Backend API
+https://electiont-booth-tracker.onrender.com
+
+### GitHub Repository
+https://github.com/gitnarayan/electiont_booth_tracker
+
 **Quick links**
 - Backend entry: [backend/server.js](backend/server.js)
 - OpenAPI spec: [backend/openapi.json](backend/openapi.json)
@@ -15,6 +28,30 @@ A small full-stack project providing an internal analytics dashboard and a field
 - Mobile (Expo): [mobile/App.js](mobile/App.js)
 
 ---
+
+
+## Future Improvements
+
+- Role-based authentication
+- Offline sync for mobile
+- GIS map visualization
+- Export reports to Excel/PDF
+- Unit and integration testing
+- GitHub Actions CI/CD
+- Pagination for large datasets
+- Advanced analytics dashboard
+
+
+
+
+## Architecture
+
+Both the React web application and the React Native mobile application consume the same Express REST API backed by a single MongoDB Atlas database. No application contains duplicated or hardcoded constituency or booth data, ensuring a single source of truth across all clients.
+
+
+
+
+
 
 ## Repository structure
 
@@ -163,6 +200,7 @@ If your mobile device is on the same network as your development machine, set th
 
 - The backend is a plain Node/Express app. Deploy behind a process manager (PM2) or containerize it with Docker. Ensure `MONGODB_URI` points to your production MongoDB and open the `PORT` used by the process or your reverse proxy.
 - The web app can be built with `npm run build` and served by any static hosting (Netlify, Vercel, S3 + CloudFront, etc.). During build, ensure the runtime API URL is provided either via `VITE_API_URL` build-time env or configured on the host to point to the backend.
+- A `vercel.json` file is included for deploying the `web` app directly from this monorepo. Set `VITE_API_URL` in Vercel project settings to the backend URL before deployment.
 - Mobile app is an Expo project — build through Expo's build services or eject to a native project for direct App Store / Play Store submission.
 
 ---
